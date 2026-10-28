@@ -27,6 +27,9 @@ for(const grade of [3,4,5,6]){
  const reloaded=boot(b.store);assert.equal(reloaded.context.wordways.getState().round,1001);
  reloaded.node('mode').value='campaign';reloaded.node('mode').onchange();assert.equal(reloaded.context.wordways.getState().level,1,'campaign position must survive endless mode');reloaded.node('mode').value='endless';reloaded.node('mode').onchange();assert.equal(reloaded.context.wordways.getState().round,1001);
 }
+const consecutive=[];for(let round=1;round<=30;round++)consecutive.push(boot(storeFor(4,12345,round)).context.wordways.getState().grid.flat().join(''));
+assert.equal(new Set(consecutive).size,30,'consecutive endless rounds must have distinct full maps');
+for(let i=1;i<consecutive.length;i++)assert.ok([...consecutive[i]].filter((cell,j)=>cell!==consecutive[i-1][j]).length>=12,'adjacent rounds must differ across many tiles');
 assert.ok(maps.size>3,'maze grids must actually vary');assert.ok(routes.size>1,'main routes must actually vary');
 console.log('PASS: '+checked+' generated questions; 128 reachable unbypassable mazes; '+maps.size+' distinct layouts; persistent round1001; campaign saves preserved.');
 `);

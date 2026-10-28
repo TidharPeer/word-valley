@@ -29,6 +29,6 @@ The final anonymous static-scene panel preferred this build 2–1. The accompany
 
 ## Endless adventure
 
-Select **הרפתקה חופשית** under **סוג המסע**. Rounds have no fixed ending. Grade-specific offline templates generate four bilingual tasks per round; seeded maze variations and content reproduce after reload. Campaign and endless progress are stored separately per grade. Words/templates may repeat; this is unlimited replay, not unlimited unique English content.
+Select **הרפתקה חופשית** under **סוג המסע**. Rounds have no fixed ending. Grade-specific offline templates generate four bilingual tasks per round. The entire endless route is generated from a saved seed, including branches, stairs, challenge positions, and an optional secret; it reproduces after reload. Campaign and endless progress are stored separately per grade. Words/templates may repeat; this is unlimited replay, not unlimited unique English content.
 
 Run `node verify-endless.cjs` to check generation, map safety, endless progression, and mode-save isolation.
