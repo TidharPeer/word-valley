@@ -30,6 +30,9 @@
     ['read','reads','read','a book','לקרוא ספר','קרא/ה ספר']
   ];
   const colors=[['red','אדום'],['blue','כחול'],['green','ירוק'],['yellow','צהוב'],['purple','סגול'],['black','שחור']];
+  const simpleObjects=[['bag','התיק'],['hat','הכובע'],['book','הספר'],['ball','הכדור']];
+  const readingObjects=[['pencil','העיפרון'],['book','הספר'],['bag','התיק'],['hat','הכובע']];
+  const adjectives=[['happy','שמח','שמחה','שמחים'],['ready','מוכן','מוכנה','מוכנים'],['tired','עייף','עייפה','עייפים'],['kind','נחמד','נחמדה','נחמדים']];
   const places=[['on the table','על השולחן'],['under the chair','מתחת לכיסא'],['in the box','בתוך הקופסה'],['behind the door','מאחורי הדלת'],['next to the bed','ליד המיטה'],['under the bed','מתחת למיטה']];
   const times=[['Monday','יום שני'],['Tuesday','יום שלישי'],['Wednesday','יום רביעי'],['Thursday','יום חמישי'],['Friday','יום שישי'],['Sunday','יום ראשון']];
   const comparisons=[
@@ -58,6 +61,7 @@
     const roundHash=mix((round>>>0)^mix(Math.floor(round/4294967296)));
     const random=rng(mix(seed^roundHash^Math.imul(grade,7919)));
     const pick=a=>a[Math.floor(random()*a.length)];
+    const alternatives=(pool,correct)=>{const available=pool.filter(item=>item!==correct);for(let i=available.length-1;i>0;i--){const j=Math.floor(random()*(i+1));[available[i],available[j]]=[available[j],available[i]];}return [correct,...available.slice(0,3)];};
     // Cyclic anchor guarantees adjacent rounds use a different core vocabulary item.
     const word=vocabulary[(mix(seed^grade)%vocabulary.length+(round-1)%vocabulary.length)%vocabulary.length];
     const person=pick(people),action=pick(actions),day=pick(times);
@@ -74,13 +78,17 @@
       if(speak){c.speak=speak;c.speakTranslationHe=translationHe;}
       challenges.push(c);
     }
-    // Vocabulary: every meaning is explicitly paired with one English word.
-    const distractors=vocabulary.filter(v=>v[0]!==word[0]);
-    const others=[];while(others.length<3){const candidate=pick(distractors);if(!others.includes(candidate))others.push(candidate);}
-    const words=[word,...others];
-    add('vocabulary',`Which word means “${word[1]}”?`,'בחרו את המילה האנגלית המתאימה למילה בעברית.',
-      words.map(w=>w[0]),words.map(w=>w[1]),0,`“${word[0]}” means “${word[1]}”.`,
-      `המילה ${word[0]} פירושה ${word[1]}.`,`${word[0]} = ${word[1]}`);
+    // Two independent vocabulary tasks: meaning and category. Category options
+    // come from different categories so only one answer can be correct.
+    const categoryRound=round%2===0&&word[2]!=='object';
+    const wordPool=categoryRound?[word,...vocabulary.filter(v=>v[2]!==word[2])]:vocabulary;
+    const words=alternatives(wordPool,word);
+    const categoryPhrase={fruit:'a fruit',vegetable:'a vegetable',animal:'an animal',furniture:'a piece of furniture',clothing:'a piece of clothing'}[word[2]];
+    add('vocabulary',categoryRound?`Which word names ${categoryPhrase}?`:`Which word means “${word[1]}”?`,
+      categoryRound?`איזו מילה באנגלית מציינת ${word[3]}?`:'בחרו את המילה האנגלית המתאימה למילה בעברית.',
+      words.map(w=>w[0]),words.map(w=>w[1]),0,
+      categoryRound?`“${word[0]}” names ${categoryPhrase}.`:`“${word[0]}” means “${word[1]}”.`,
+      categoryRound?`${word[0]} היא מילה שמציינת ${word[3]}.`:`המילה ${word[0]} פירושה ${word[1]}.`,`${word[0]} = ${word[1]}`);
 
     if(grade===3){
       if(round%2){
@@ -90,10 +98,11 @@
           `לפני ${word[0]} משתמשים ב־${word[4]} לפי הצליל הפותח של המילה.`,`אני יכול/ה לראות ${word[1]}.`);
       }else{
         const plural=round%4===0;
-        add('grammar',plural?'Complete: “They ___ happy.”':`Complete: “${person[0]} ___ happy.”`,
+        const adjective=pick(adjectives);
+        add('grammar',plural?`Complete: “They ___ ${adjective[0]}.”`:`Complete: “${person[0]} ___ ${adjective[0]}.”`,
           'בחרו את צורת הפועל be המתאימה לנושא.',['is','are','am','be'],['is','are','am','be'],plural?1:0,
           plural?'Use “are” with “they.”':'Use “is” with one person.',
-          plural?'עם they משתמשים ב־are.':'עם שם של אדם יחיד משתמשים ב־is.',plural?'הם שמחים.':`${person[1]} ${female?'שמחה':'שמח'}.`);
+          plural?'עם they משתמשים ב־are.':'עם שם של אדם יחיד משתמשים ב־is.',plural?`הם ${adjective[3]}.`:`${person[1]} ${adjective[female?2:1]}.`);
       }
     }else if(grade===4){
       const negative=round%2===0;
@@ -127,41 +136,45 @@
     }
 
     if(grade===3){
-      const color=pick(colors),otherColors=colors.filter(c=>c!==color).slice(0,3);const opts=[color,...otherColors];
-      add('listening','Listen. What color is the bag?','האזינו. מה צבע התיק?',opts.map(c=>c[0]),opts.map(c=>c[1]),0,
-        `The speaker says the bag is ${color[0]}.`,`צבע התיק הוא ${color[1]}.`,`התיק שלי ${color[1]}.`,`My bag is ${color[0]}.`);
+      const color=pick(colors),thing=pick(simpleObjects),opts=alternatives(colors,color);
+      add('listening',`Listen. What color is the ${thing[0]}?`,`האזינו. מה הצבע של ${thing[1]}?`,opts.map(c=>c[0]),opts.map(c=>c[1]),0,
+        `The speaker says the ${thing[0]} is ${color[0]}.`,`${thing[1]} ${color[1]}.`,`${thing[1]} שלי ${color[1]}.`,`My ${thing[0]} is ${color[0]}.`);
     }else if(grade===4){
-      const place=pick(places),otherPlaces=places.filter(p=>p!==place).slice(0,3);const opts=[place,...otherPlaces];
-      add('listening','Listen. Where is the book?','האזינו. היכן הספר?',opts.map(p=>p[0]),opts.map(p=>p[1]),0,
-        `The book is ${place[0]}.`,`הספר נמצא ${place[1]}.`,`הספר נמצא ${place[1]}.`,`The book is ${place[0]}.`);
+      const place=pick(places),thing=pick(readingObjects),opts=alternatives(places,place);
+      add('listening',`Listen. Where is the ${thing[0]}?`,`האזינו. היכן ${thing[1]}?`,opts.map(p=>p[0]),opts.map(p=>p[1]),0,
+        `The ${thing[0]} is ${place[0]}.`,`${thing[1]} נמצא ${place[1]}.`,`${thing[1]} נמצא ${place[1]}.`,`The ${thing[0]} is ${place[0]}.`);
     }else{
-      const otherDays=times.filter(d=>d!==day).slice(0,3);const opts=[day,...otherDays];
-      const speech=grade===5?`${person[0]} visited the museum last ${day[0]}.`:`${person[0]} will visit the museum next ${day[0]}.`;
-      const translation=grade===5?`${person[1]} ${female?'ביקרה':'ביקר'} במוזיאון ב${day[1]} שעבר.`:`${person[1]} ${female?'תבקר':'יבקר'} במוזיאון ב${day[1]} הבא.`;
-      add('listening',grade===5?'Listen. On which day did the visit happen?':'Listen. On which day will the visit happen?',
-        grade===5?'האזינו. באיזה יום התקיים הביקור?':'האזינו. באיזה יום יתקיים הביקור?',opts.map(d=>d[0]),opts.map(d=>d[1]),0,
-        `The sentence names ${day[0]} as the day of the visit.`,`המשפט מציין שהביקור הוא ב${day[1]}.`,translation,speech);
+      const heardAction=pick(grade===5?actions.slice(0,-1):actions),opts=alternatives(times,day);
+      const speech=grade===5?`${person[0]} ${heardAction[2]} ${heardAction[3]} last ${day[0]}.`:`${person[0]} will ${heardAction[0]} ${heardAction[3]} next ${day[0]}.`;
+      const translation=grade===5?`${person[1]} ${verbHe(heardAction)} ב${day[1]} שעבר.`:`${person[1]} ${verbHe(heardAction,true)} ב${day[1]} הבא.`;
+      add('listening',grade===5?'Listen. On which day did it happen?':'Listen. On which day will it happen?',
+        'האזינו. איזה יום מוזכר במשפט?',opts.map(d=>d[0]),opts.map(d=>d[1]),0,
+        `The sentence names ${day[0]}.`,`המשפט מציין את ${day[1]}.`,translation,speech);
     }
 
     if(grade<=4){
-      const location=places[(mix(seed)+round)%places.length],opts=[location,...places.filter(p=>p!==location).slice(0,3)];
-      add('vocabulary',`Read: “The pencil is ${location[0]}.” Where is the pencil?`,'קראו את המשפט. היכן העיפרון?',
-        opts.map(p=>p[0]),opts.map(p=>p[1]),0,`The sentence says the pencil is ${location[0]}.`,
-        `במשפט נאמר שהעיפרון נמצא ${location[1]}.`,`העיפרון נמצא ${location[1]}.`);
+      const location=pick(places),thing=pick(readingObjects),opts=alternatives(places,location);
+      add('vocabulary',`Read: “The ${thing[0]} is ${location[0]}.” Where is the ${thing[0]}?`,`קראו את המשפט. היכן ${thing[1]}?`,
+        opts.map(p=>p[0]),opts.map(p=>p[1]),0,`The sentence says the ${thing[0]} is ${location[0]}.`,
+        `במשפט נאמר ש${thing[1]} נמצא ${location[1]}.`,`${thing[1]} נמצא ${location[1]}.`);
     }else{
       const reasons=[
-        ['it was raining','it will rain','rain','גשם','ירד גשם','ירד גשם'],
+        ['it was raining','it will rain','rain','גשם','ירד גשם','יירד גשם'],
         ['it was cold','it will be cold','cold weather','מזג אוויר קר','היה קר','יהיה קר'],
         ['it was very hot','it will be very hot','very hot weather','מזג אוויר חם מאוד','היה חם מאוד','יהיה חם מאוד'],
-        ['there was a storm','there will be a storm','a storm','סערה','הייתה סערה','תהיה סערה']
+        ['there was a storm','there will be a storm','a storm','סערה','הייתה סערה','תהיה סערה'],
+        ['it was snowing','it will snow','snow','שלג','ירד שלג','יירד שלג'],
+        ['the wind was strong','the wind will be strong','strong wind','רוח חזקה','נשבה רוח חזקה','תנשב רוח חזקה']
       ];
-      const reason=reasons[(mix(seed^grade)+round)%reasons.length];
-      const opts=[reason,...reasons.filter(r=>r!==reason)];
-      const sentence=grade===5?`${person[0]} stayed indoors because ${reason[0]}.`:`${person[0]} will stay indoors because ${reason[1]}.`;
-      add('vocabulary',`Read: “${sentence}” Why ${grade===5?'did':'will'} ${person[0]} stay indoors?`,
-        'קראו את המשפט. מדוע הדמות נשארת בפנים?',opts.map(r=>r[2]),opts.map(r=>r[3]),0,
+      const reason=pick(reasons),opts=alternatives(reasons,reason),picnic=round%2===0;
+      const activity=grade===5?(picnic?'canceled the picnic':'stayed indoors'):(picnic?'will cancel the picnic':'will stay indoors');
+      const sentence=`${person[0]} ${activity} because ${reason[grade===5?0:1]}.`;
+      const question=picnic?`Why ${grade===5?'did':'will'} ${person[0]} cancel the picnic?`:`Why ${grade===5?'did':'will'} ${person[0]} stay indoors?`;
+      const actionHe=picnic?(grade===5?(female?'ביטלה את הפיקניק':'ביטל את הפיקניק'):(female?'תבטל את הפיקניק':'יבטל את הפיקניק')):(grade===5?(female?'נשארה בפנים':'נשאר בפנים'):(female?'תישאר בפנים':'יישאר בפנים'));
+      add('vocabulary',`Read: “${sentence}” ${question}`,
+        picnic?(grade===5?'קראו את המשפט. מדוע הפיקניק בוטל?':'קראו את המשפט. מדוע הפיקניק יבוטל?'):'קראו את המשפט. מדוע הדמות נשארת בפנים?',opts.map(r=>r[2]),opts.map(r=>r[3]),0,
         `The reason given is ${reason[2]}.`,`הסיבה המפורשת במשפט היא ${reason[3]}.`,
-        `${person[1]} ${grade===5?(female?'נשארה':'נשאר'):(female?'תישאר':'יישאר')} בפנים כי ${reason[grade===5?4:5]}.`);
+        `${person[1]} ${actionHe} כי ${reason[grade===5?4:5]}.`);
     }
     const world=worlds[(round-1)%3];
     return {level:{id:prefix,title:world[2],titleHe:world[1],subtitle:`Grade ${grade} · Round ${round}`,

@@ -6,7 +6,7 @@ for(const next of b.context.wordways.pathTo(9,9)){
  const now=b.context.wordways.getState().player;
  b.handlers.keydown({key:next.x>now.x?'ArrowRight':next.x<now.x?'ArrowLeft':next.y>now.y?'ArrowDown':'ArrowUp',preventDefault(){}});
 }
-assert.ok(b.context.wordways.getState().won);
+assert.equal(b.context.wordways.getState().won,false);assert.equal(b.node('modal').hidden,false,'pickup prompt opens on exit');b.handlers.keydown({key:'Escape',preventDefault(){}});assert.equal(b.node('modal').hidden,false,'Escape must not dismiss the pickup prompt');b.node('continue').onclick();assert.ok(b.context.wordways.getState().collected&&b.context.wordways.getState().won);
 assert.equal(b.node('close').hidden,true);
 b.handlers.keydown({key:'Escape',preventDefault(){}});
 assert.equal(b.node('modal').hidden,false,'Escape must not strand a completed chapter');
