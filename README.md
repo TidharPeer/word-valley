@@ -1,6 +1,6 @@
 # מסלולי מילים — Wordways
 
-A Hebrew RTL English-learning maze adventure for grades 3–6. Browser-native Canvas 2D, HTML and CSS; no build step or dependencies. Desktop keyboard and tap navigation, mobile movement buttons, three worlds, 48 bilingual practice challenges, and independent local progress for each grade. Each world now has a companion mission and an optional secret page on a side path.
+A Hebrew RTL English-learning maze adventure for grades 3–6. Browser-native Canvas 2D, HTML and CSS; no build step or dependencies. One-step movement uses arrow keys, WASD, or on-screen direction buttons on desktop and mobile. The game has three worlds, 48 bilingual practice challenges, and independent local progress for each grade. Each world has a companion mission and an optional secret page on a side path.
 
 ## Run locally
 
