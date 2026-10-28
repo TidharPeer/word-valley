@@ -1,6 +1,6 @@
 # מסלולי מילים — Wordways
 
-A Hebrew RTL English-learning maze adventure for grades 3–6. Browser-native Canvas 2D, HTML and CSS; no build step or dependencies. Desktop keyboard and tap navigation, mobile movement buttons, three worlds, 48 bilingual practice challenges, and independent local progress for each grade.
+A Hebrew RTL English-learning maze adventure for grades 3–6. Browser-native Canvas 2D, HTML and CSS; no build step or dependencies. Desktop keyboard and tap navigation, mobile movement buttons, three worlds, 48 bilingual practice challenges, and independent local progress for each grade. Each world now has a companion mission and an optional secret page on a side path.
 
 ## Run locally
 
@@ -8,7 +8,7 @@ From this folder run `node serve.cjs`, then open [the game](http://127.0.0.1:417
 
 ## Verify
 
-Run `node verify.cjs`, `node verify-saves.cjs`, `node verify-render.cjs`, `node verify-win.cjs`, and `node verify-gates.cjs`.
+Run `node verify.cjs`, `node verify-saves.cjs`, `node verify-render.cjs`, `node verify-win.cjs`, `node verify-gates.cjs`, `node verify-endless.cjs`, and `node verify-story.cjs`.
 
 These verify challenge completion, gate progression, replay, grade saves and rendering calls in a simulated DOM. Browser checks are recorded in the journal; these tests do not replace physical-device, human listening, or classroom testing.
 
@@ -18,6 +18,7 @@ These verify challenge completion, gate progression, replay, grade saves and ren
 - `lessons.js` provides four grade-specific practice sets, with optional Hebrew assistance. These are introductory practice sets, not a complete school curriculum.
 - Original sound effects from the workspace are in `dist/audio/`. Listening tasks use the browser's English speech synthesis. An explicitly labeled transcript hint remains available if a voice cannot play.
 - Progress is stored on this device in browser local storage; it is not synchronized between devices. Returning to a chapter starts at its entrance while retaining completed challenges.
+- The companion introduces the mission in Hebrew and gives an English clue with a Hebrew translation. Finding the golden page is optional and changes the companion dialogue and ending. Secret discovery is saved per chapter or endless round.
 - The visual comparison reference is [Monument Valley II](https://ustwogames.co.uk/our-games/monument-valley-2/). Its artwork is not used as game assets. The journal records unresolved quality gaps honestly.
 
 The user approved a private online preview. Hosting configuration is prepared; the local game also works independently of hosting.
